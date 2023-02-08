@@ -1,0 +1,5 @@
+package MVC
+
+class View {
+
+}
