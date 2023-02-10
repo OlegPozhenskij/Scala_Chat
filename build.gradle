@@ -44,5 +44,4 @@ dependencies {
 }
 
 apply plugin: 'application'
-
 mainClassName = 'Mainframe'
