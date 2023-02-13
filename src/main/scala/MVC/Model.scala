@@ -1,19 +1,40 @@
 package MVC
 
-import akka.actor.ActorRef
-import javafx.collections.{FXCollections, ObservableList}
+import Traits.{TModel, User}
+import javafx.stage.Stage
 
-//--1
-case class User(name: String, actorRef: Option[ActorRef])
+case class ChatRoom(withUser: User, ctx: View)
 
-case class Msg(msg: String, user: User)
+class Model extends TModel {
+  //context Stage - то с чем будем работать
+  private var ctxStage: Option[Stage] = None
 
-case class ChatRoom(host: User, guest: User)
+  def setCtxStage(stage: Stage): Unit = {
+    ctxStage = Option(stage)
+  }
 
-//--2
+  def getCtxStage = ctxStage.get
+}
+
 // observableArrayList для уменьшения кол-ва уведомлений и работы с ObservableList
 object Model {
-  val msgList: ObservableList[Msg] = FXCollections.observableArrayList()
-  val usersList: ObservableList[User] = FXCollections.observableArrayList()
-  var hostUser: User = null
+
+//  User -> Option[User]
+  var hostUser: Option[User] = None
+//  Сэт комнат доступных статически
+  var chatrms: Set[ChatRoom] = Set()
+//  Main View
+  var mainChatView: View = _
+
+  def apply(): Model = new Model ()
+
+//  Сэт для хоста
+  def setHostUser(user: User): Unit = hostUser = Option(user)
 }
+
+
+
+
+
+
+
