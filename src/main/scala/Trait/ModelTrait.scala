@@ -1,14 +1,15 @@
-package Traits
+package Trait
 
 import akka.actor.ActorRef
+import conf.JsonSerializable
 import javafx.collections.{FXCollections, ObservableList}
 
-case class User(name: String, actorRef: Option[ActorRef])
+final case class User(name: String, actorRef: ActorRef) extends JsonSerializable
 
-case class Msg(msg: String, user: User)
+final case class Msg(msg: String, user: User) extends JsonSerializable
 
-// Просто перенесли общие элементы в отдельный трейт
-trait TModel {
+trait ModelTrait {
   val msgList: ObservableList[Msg] = FXCollections.observableArrayList()
   val usersList: ObservableList[User] = FXCollections.observableArrayList()
 }
+

@@ -1,30 +1,21 @@
 package MVC
 
+import Trait.{ModelTrait, Msg, User}
+import javafx.application.Platform
 import javafx.beans.property.ReadOnlyStringWrapper
-import javafx.event.ActionEvent
 import javafx.fxml.{FXML, Initializable}
 import javafx.scene.control.TableColumn.CellDataFeatures
-import javafx.scene.control.{Button, ScrollPane, TableColumn, TableView, TextArea, TextInputDialog}
+import javafx.scene.control._
 import javafx.scene.input.{KeyCode, KeyEvent, MouseEvent}
-import Traits.{Msg, TModel, User}
 
 import java.net.URL
 import java.util.{Optional, ResourceBundle}
 
-//ctx == View
-
 class View extends Initializable {
 
-  //маркер приватного чата
-  private var privateChat: Boolean = false
+  private var isPrivateChat: Boolean = false
+  private val model: ModelTrait = Model()
 
-  // ссылка на модель
-  private val model: TModel = Model()
-
-  def getModel: TModel = model
-
-
-  //Компоненты соединённые с файлом .fxml
   @FXML
   var msgField: TextArea = _
   @FXML
@@ -40,13 +31,10 @@ class View extends Initializable {
   @FXML
   var usersId: TableColumn[User, String] = _
   @FXML
-  var scroll: ScrollPane = _  // на всякий
+  var scroll: ScrollPane = _
 
-
-  //методы связанные с fxml
   @FXML
   def handle(ke: KeyEvent): Unit = {
-//    при нажатии на энтер (обработчик)
     if (ke.getCode.getCode equals KeyCode.ENTER.getCode) {
       sendMsg()
     }
@@ -54,104 +42,69 @@ class View extends Initializable {
 
   @FXML
   def sendMsg(): Unit = {
-    //сохранили текст в лист msg
     Controller.pushMsg(this, msgField.getText())
-    //очистили поле ввода
     msgField.setText("")
   }
 
-//  Во вью буду использовать только проверки, а сам функционал будет в контроллере
   @FXML
-  def openPrivateChat(e: MouseEvent) = {
-//    таблица не заполненна и нет ещё приватного чата
-    if(usersTable.getSelectionModel != null && !privateChat) {
-      //получаем выбранного юзера из таблицы юзеров
+  def openPrivateChat(e: MouseEvent): Unit = {
+    if (usersTable.getSelectionModel != null && !isPrivateChat) {
       val user: Option[User] = Option(usersTable.getSelectionModel.getSelectedItem)
       user match {
-        case user: Some[User] => {
-
+        case user: Some[User] =>
           Controller.openPrivateChat(user.get)
-
-          // А потом очищаем выбранного юзера
           usersTable.getSelectionModel.clearSelection()
-        }
-        case _ => //ничего не делаем
+        case _ =>
       }
-
     }
   }
 
+  def getIsPrivateChat: Boolean = isPrivateChat
 
-
-  //настройки приватного чата
   def initPrivateChat(flag: Boolean): Unit = {
-    // false -> true
-    privateChat = flag
-    // запрет выбора пользователей из таблицы в приватном режиме
+    isPrivateChat = flag
     usersTable.setSelectionModel(null)
+    usersId.setSortable(false)
   }
 
-//  Метода создающий минидиалог для инициализации хоста
+  def getModel: ModelTrait = model
+
   def userNameImpute(): Unit = {
-    val dialog = new TextInputDialog("User name")
+    val dialog = new TextInputDialog("Trait.User name")
 
     dialog.setTitle(null)
     dialog.setHeaderText("Enter your name:")
     dialog.setContentText("Name:")
 
-//    Получаем данные
     val result: Optional[String] = dialog.showAndWait
+    result.ifPresentOrElse((name: String) => {
+      //устанавливаем хоста (основного юзера для каждой программы)
+      Controller.setHostUser(name)
+    }, () => {
+      Platform.exit()
+      System.exit(0)
+    })
 
-//    Если значение присутствует, выполняет данное действие со значением,
-//    в противном случае ничего не делает.
-    result.ifPresent((name: String) => Controller.setHostUserName(name))
   }
 
-
-
-  // Метод запустится как только загрузится Room.fxml в Mainframe
-  // Метод нужен, когда требуется производить действия в Room.dxml,
   override def initialize(location: URL, resources: ResourceBundle): Unit = {
-
-    // как настройки, которые ничего не возвращают---
-
-    // Инициализация таблиы userId (Что-то по типу лисенера, как только появляется новый msg в )
     userId.setCellValueFactory((msg: CellDataFeatures[Msg, String]) => {
       new ReadOnlyStringWrapper(msg.getValue.user.name)
     })
 
-    //ещё одна фабрика по добавлению значения в ячейку
-    usersId.setCellValueFactory((user: CellDataFeatures[User, String]) => {
-      new ReadOnlyStringWrapper(user.getValue.name)
-    })
-
-    //ещё одна фабрика по добавлению значения в ячейку
     msgId.setCellValueFactory((msg: CellDataFeatures[Msg, String]) => {
       new ReadOnlyStringWrapper(msg.getValue.msg)
     })
 
 
+    usersId.setCellValueFactory((user: CellDataFeatures[User, String]) => {
+      new ReadOnlyStringWrapper(user.getValue.name)
+    })
 
-    // TODO   implement line wrapper later (слушатель заполнения строки)
-
-
-
-    // инициализация ячеек и вставка значений
-
-    // в себе содержит и msg, и user
     chatTable.setItems(model.msgList)
-
-    //имя юзера и ссылка на актор
     usersTable.setItems(model.usersList)
-
-//    Эта модель выбора используется для определения того,
-//    какие компоненты выбраны в данный момент и как они должны быть отрисованы.
-//    null - по стандарту
     chatTable.setSelectionModel(null)
-
-    // запускаем диалоговое окно в которое нужно вписать данные, если хоста нет,
-    // иначе просто окно чата (приватного)
-    Model.hostUser getOrElse userNameImpute()
+    Model.hostUser.getOrElse(userNameImpute)
   }
 
 }

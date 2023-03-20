@@ -1,10 +1,4 @@
-//Плагины Java и Scala позволяют проекту использовать Java
-//и масштабировать код в проекте. Плагин приложения позволяет
-//проекту создавать распространяемую версию проекта. Наконец,
-//плагин org.openjfx.javafx plugin позволяет проекту использовать JavaFX
-//для создания графического пользовательского интерфейса.
 plugins {
-    id 'java'
     id 'scala'
     id 'application'
     id 'org.openjfx.javafxplugin' version '0.0.8'
@@ -13,35 +7,27 @@ plugins {
 group 'org.example'
 version '1.0-SNAPSHOT'
 
-sourceCompatibility = 11
+sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
 }
 
 
-//Это указывает на то, что используемая версия JavaFX равна 11
-// и что приложение использует два модуля из библиотеки JavaFX,
-// 'javafx.controls' и 'javafx.fxml'.
 javafx {
-    version = "11"
-    modules = [ 'javafx.controls', 'javafx.fxml' ]
+    version = "14"
+    modules = ['javafx.controls', 'javafx.fxml']
 }
 
-
-// Подключаем зависимости
-//testImplementation group: - это особый тип конфигурации,
-// который позволяет вам указать точную версию библиотеки или фреймворка,
-// от которой будет зависеть ваш проект. Это помогает обеспечить согласованность
-// сборок вашего проекта и использование одной и той же версии библиотеки
-// или фреймворка в нескольких проектах.
 dependencies {
-    implementation group: 'org.scala-lang', name: 'scala-library', version: '2.12.10'
-    testImplementation group: 'org.scalatest', name: 'scalatest_2.13', version: '3.2.2'
-    testImplementation group: 'junit', name: 'junit', version: '4.12'
-    implementation group: 'com.typesafe.akka', name: "akka-actor_2.12", version: '2.6.6'
-    implementation group: 'com.typesafe.akka', name: "akka-cluster_2.12", version: '2.6.6'
+    implementation 'org.scala-lang:scala-library:2.13.10'
+    testImplementation 'org.scalatest:scalatest_2.13:3.2.15'
+    implementation group: 'org.scalatest', name: 'scalatest_2.13', version: '3.3.0-SNAP2'
+    implementation group: 'com.typesafe.akka', name: "akka-actor_2.13", version: '2.6.6'
+    implementation group: 'com.typesafe.akka', name: "akka-cluster_2.13", version: '2.6.6'
+    implementation group: 'com.typesafe.akka', name: "akka-serialization-jackson_2.13", version: '2.6.6'
 }
 
 apply plugin: 'application'
-mainClassName = 'Mainframe'
+mainClassName = 'MainApp'
+
